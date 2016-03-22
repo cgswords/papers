@@ -39,7 +39,7 @@ fn new_entry() -> Record {
 fn resolve_action(matches : getopts::Matches) -> Action {
   cond!(matches.opt_present("h") => { return Action::Help; }, 
         matches.opt_present("a") => { return Action::Add; }, 
-        else                     => { return Action::Empty; })
+        orelse                   => { return Action::Empty; })
 }
 
 fn print_usage(opts : Options) {
