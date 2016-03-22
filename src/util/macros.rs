@@ -2,7 +2,7 @@
 
 #[macro_export]
 macro_rules! cond{
-  ($($pred:expr => $body:block),+ orelse => $default:block) => (
+  ($($pred:expr => $body:block),+ else => $default:block) => (
     $(if $pred $body else)+
     
     $default
