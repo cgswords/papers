@@ -4,9 +4,9 @@ extern crate getopts;
 extern crate rustc_serialize;
 
 use papers::util::macros::*;
-use papers::datatypes::Record;
-use papers::datatypes::Action;
-use papers::datatypes::ProgState;
+use papers::datatypes::record::*;
+use papers::datatypes::action::*;
+use papers::datatypes::progstate::*;
 use getopts::Options;
 use std::io;
 use std::env;

@@ -2,9 +2,6 @@
 
 #[macro_export]
 macro_rules! cond{
-  ($($pred:expr => $body:block),+ orelse => $default:block) => (
-    $(if $pred $body else)+
-    
-    $default
-  )
+  (orelse => $default:block) => ($default);
+  ($pred:expr => $body:block , $($tail:tt)*) => (if $pred $body else { cond!($($tail)*) })
 }
