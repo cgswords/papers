@@ -1,6 +1,6 @@
 extern crate csv;
 extern crate getopts;
-extern crate papers;
+#[macro_use] extern crate papers;
 extern crate rustc_serialize;
 
 use papers::util::macros::*;
