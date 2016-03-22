@@ -1,2 +1,2 @@
 extern crate rustc_serialize;
-pub mod papers;
+pub mod datatypes;

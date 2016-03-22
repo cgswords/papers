@@ -3,9 +3,10 @@ extern crate getopts;
 extern crate papers;
 extern crate rustc_serialize;
 
-use papers::papers::datatypes::Record;
-use papers::papers::datatypes::Action;
-use papers::papers::datatypes::ProgState;
+use papers::util::util::*;
+use papers::datatypes::Record;
+use papers::datatypes::Action;
+use papers::datatypes::ProgState;
 use getopts::Options;
 use std::io;
 use std::env;
@@ -36,14 +37,12 @@ fn new_entry() -> Record {
 }
 
 fn resolve_action(matches : getopts::Matches) -> Action {
-  if matches.opt_present("h") {
-    return Action::Help;
-  } 
-  if matches.opt_present("a") {
-    return Action::Add;
-  } 
- 
   return Action::Empty;
+  cond!(
+    matches.opt_present("h") => { return Action::Help; }
+    matches.opt_present("a") => { return Action::Add; }
+    _                        => { return Action::Empty; }
+  )
 }
 
 fn print_usage(opts : Options) {
