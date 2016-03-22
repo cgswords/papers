@@ -3,7 +3,7 @@ extern crate getopts;
 extern crate papers;
 extern crate rustc_serialize;
 
-use papers::util::util::*;
+use papers::util::macros::*;
 use papers::datatypes::Record;
 use papers::datatypes::Action;
 use papers::datatypes::ProgState;
