@@ -9,10 +9,12 @@ use papers::datatypes::action::*;
 use papers::datatypes::progstate::*;
 use getopts::Options;
 use std::io;
+use std::io::prelude::*;
 use std::io::BufWriter;
 use std::io::BufReader;
 use std::env;
 use std::fs::File;
+use std::fs::OpenOptions;
 
 fn get_input(message : & str, target : &mut String) {
   println!("{}", message);
@@ -84,25 +86,16 @@ fn main() {
     println!("Action: {:?}", pstate.action);
   }
 
-  let mut f = match File::open(&pstate.path) 
+  let mut f = match OpenOptions::new().read(true).write(true).append(true).create(true).open(&pstate.path) 
                 { Ok(f)  => f 
-                , Err(e) => match File::create(&pstate.path)
-                              { Ok(f)  => f
-                              , Err(e) => panic!("File not found")
-                              }
+                , Err(e) => panic!("File not found or created")
                 };
 
-  // OH LORD -- BufReaders aren't supported by csv.
-  // let mut brdr = BufReader::new(&f);
+  // Make a CSV reader for the file.
   let mut rdr = csv::Reader::from_file(&pstate.path).expect("No papers found."); // Might panic. 
 
-  // BufWriters are, though.
-  let mut bwtr = BufWriter::new(&f); 
-  // This nukes the file.
-  // let mut wtr = csv::Writer::from_file(&pstate.path).expect("No paper file found."); // Grab your writer
-  let mut wtr = csv::Writer::from_buffer(bwtr); // Grab the writer
-  println!("File open.");
-  
+  // Make a new internal-memory writer.
+  let mut wtr = csv::Writer::from_memory();
 
 	match pstate.action 
 		{ Action::Help          => print_usage(opts)
@@ -113,7 +106,11 @@ fn main() {
     , Action::Empty         => print_usage(opts)
 		};
 
-  wtr.flush();
+  let strRes = wtr.as_string();
+  println!("Encoded output: {}", strRes);
+
+  // Easiest way to get a &str into &[u8] is to go &str->String->Vec[u8]->&[u8]
+  f.write_all(&strRes.to_owned().into_bytes());
 
   println!("-------------------------------------");
   for record in rdr.decode() {
