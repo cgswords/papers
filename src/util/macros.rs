@@ -13,17 +13,13 @@ macro_rules! withDefault{
 
 #[macro_export]
 macro_rules! bindMaybe{
-    ($left:expr, $right:stmt) => ( match $left
-                           { Ok(val) => $right(val)
-                           ; Err(e)  => Err(e)
-                           }
-                       )
+    ($left:expr, $right:stmt) => (match $left { Ok(val) => $right(val) ; Err(e)  => Err(e) })
 }
 
 #[macro_export]
 macro_rules! mdo{ 
   ($x:ident <- $y:expr ; $($tail:tt)*) => ( bindMaybe!($y, |$x|   mdo!($($tail)*)));
-  ($y:block ; $($tail:tt)*)          => ( { $y; mdo!($($tail)*) });
-  ($y:expr )                        => ( Ok($y));
+  ($y:block ; $($tail:tt)*)            => ( { $y; mdo!($($tail)*) });
+  ($y:expr )                           => ( Ok($y));
 }
   
