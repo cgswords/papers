@@ -52,36 +52,21 @@ fn do_init(opts : &mut Options) -> ProgState {
   let program = args[0].clone();
   let mut fexists = false;
 
-	// opts.optopt("a", "add", "Add a new entry", "NAME);
+	// opts.optopt("a", "add", "Add a new entry", "NAME");
 	opts.optflag("a", "add", "Add a new entry");
 	opts.optflag("h", "help", "print this help menu");
 
   let key = "HOME";
-  //let mut path = withDefault("~".to_owned(), env::var(key))
-  mdo!( matches  <- opts.parse(&args[1..])
-      ; path    <- Ok(withDefault!("~".to_owned(), env::var(key)))
-      ; path2   <- path + "/papers.csv"
-      ; return ProgState { action : resolve_action(matches)
-                         , file_exists : fexists 
-                         , path : path 
-                         }
-      )
-// 	let matches = withDefault!(panic!(e.to_string()), opts.parse(&args[1..])) 
-//  match opts.parse(&args[1..]) 
-//    { Ok(m)  => { m }
-//    , Err(f) => { panic!(f.to_string()) }
-//    };
-
-  // let mut path = 
-  //   match env::var(key) 
-  //     { Ok(val) => {fexists = true; val}
-  //     , Err(e)  => "~".to_owned()
-  //     };
-  // path.push_str("/papers.csv");
-  // return ProgState { action : resolve_action(matches)
-  //                  , file_exists : fexists 
-  //                  , path : path 
-  //                  }
+  // In which I write Haskell inside of Rust.
+  // At some point be sure to do efficiency analysis on this.
+  mdo!( matches <- opts.parse(&args[1..]).ok()
+      ; path    <- withDefaultOpt!("~".to_owned(), env::var(key).ok())
+      ; path2   <- Some(path + "/papers.csv")
+      ; and ProgState { action : resolve_action(matches)
+                      , file_exists : fexists 
+                      , path : path2 
+                      }
+      ).unwrap()
 }
 
 fn main() {

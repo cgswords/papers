@@ -7,19 +7,19 @@ macro_rules! cond{
 }
 
 #[macro_export]
-macro_rules! withDefault{
-  ($default, $expr)  => (match $expr { Ok(val) => val; Err(e) => $default})
+macro_rules! withDefaultOpt{
+  ($default:expr, $expr:expr)  => (match $expr { Some(val) => $expr, None => Some($default)})
 }
 
 #[macro_export]
-macro_rules! bindMaybe{
-    ($left:expr, $right:stmt) => (match $left { Ok(val) => $right(val) ; Err(e)  => Err(e) })
+macro_rules! bindOpt{
+    ($left:expr, $right:expr) => (match $left { Some(val) => $right(val) , None => None })
 }
 
 #[macro_export]
 macro_rules! mdo{ 
-  ($x:ident <- $y:expr ; $($tail:tt)*) => ( bindMaybe!($y, |$x|   mdo!($($tail)*)));
+  (and $y:expr )                       => ( bindOpt!(Some($y), |x| Some(x)));
+  ($x:ident <- $y:expr ; $($tail:tt)*) => ( bindOpt!($y,       |$x|   mdo!($($tail)*)));
   ($y:block ; $($tail:tt)*)            => ( { $y; mdo!($($tail)*) });
-  ($y:expr )                           => ( Ok($y));
 }
   
