@@ -37,9 +37,9 @@ fn new_entry() -> Record {
 }
 
 fn resolve_action(matches : getopts::Matches) -> Action {
-  cond!(matches.opt_present("h") => { return Action::Help; }, 
-        matches.opt_present("a") => { return Action::Add; }, 
-        orelse                   => { return Action::Empty; })
+  cond!( matches.opt_present("h") => { return Action::Help; }
+       , matches.opt_present("a") => { return Action::Add; }
+       , orelse                   => { return Action::Empty; })
 }
 
 fn print_usage(opts : Options) {
@@ -56,22 +56,32 @@ fn do_init(opts : &mut Options) -> ProgState {
 	opts.optflag("a", "add", "Add a new entry");
 	opts.optflag("h", "help", "print this help menu");
 
- 	let matches = match opts.parse(&args[1..]) {
-    Ok(m)  => { m }
-    Err(f) => { panic!(f.to_string()) }
-  };
-
   let key = "HOME";
-  let mut path = match env::var(key) 
-                   { Ok(val) => {fexists = true; val}
-                   , Err(e)  => "~".to_owned()
-                   };
-  path.push_str("/papers.csv");
+  //let mut path = withDefault("~".to_owned(), env::var(key))
+  mdo!( matches  <- opts.parse(&args[1..])
+      ; path    <- Ok(withDefault!("~".to_owned(), env::var(key)))
+      ; path2   <- path + "/papers.csv"
+      ; return ProgState { action : resolve_action(matches)
+                         , file_exists : fexists 
+                         , path : path 
+                         }
+      )
+// 	let matches = withDefault!(panic!(e.to_string()), opts.parse(&args[1..])) 
+//  match opts.parse(&args[1..]) 
+//    { Ok(m)  => { m }
+//    , Err(f) => { panic!(f.to_string()) }
+//    };
 
-  return ProgState { action : resolve_action(matches)
-                   , file_exists : fexists 
-                   , path : path 
-                   }
+  // let mut path = 
+  //   match env::var(key) 
+  //     { Ok(val) => {fexists = true; val}
+  //     , Err(e)  => "~".to_owned()
+  //     };
+  // path.push_str("/papers.csv");
+  // return ProgState { action : resolve_action(matches)
+  //                  , file_exists : fexists 
+  //                  , path : path 
+  //                  }
 }
 
 fn main() {
