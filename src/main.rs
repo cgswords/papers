@@ -9,7 +9,10 @@ use papers::datatypes::action::*;
 use papers::datatypes::progstate::*;
 use getopts::Options;
 use std::io;
+use std::io::BufWriter;
+use std::io::BufReader;
 use std::env;
+use std::fs::File;
 
 fn get_input(message : & str, target : &mut String) {
   println!("{}", message);
@@ -17,33 +20,29 @@ fn get_input(message : & str, target : &mut String) {
 }
 
 fn new_entry() -> Record {
-  let mut title   = String::new();
-  let mut authors = String::new();
-  let mut tags    = String::new();
-  let mut link    = String::new();
+  let mut title   : String = String::new();
+  let mut authors : String = String::new();
+  let mut tags    : String = String::new();
+  let mut link    : String = String::new();
 
   get_input("Title: "   , &mut title);
   get_input("Authors: " , &mut authors);
   get_input("Tags: "    , &mut tags);
   get_input("Link: "    , &mut link);
 
-  return Record { title   : title.trim()
-                , authors : authors.trim()
-                , tags    : tags.trim()
-                , link    : link .trim()
+  return Record { title   : title.trim().to_owned()
+                , authors : authors.trim().to_owned()
+                , tags    : tags.trim().to_owned()
+                , link    : link.trim().to_owned()
                 , review  : String::new()
                 };
 
 }
 
 fn resolve_action(matches : getopts::Matches) -> Action {
-  if matches.opt_present("h") { return Action::Help; }
   cond!( matches.opt_present("h") => { return Action::Help; }
        , matches.opt_present("a") => { return Action::Add; }
        , orelse                   => { return Action::Empty; });
-
-  println!("Cond failed");
-  return Action::Empty
 }
 
 fn print_usage(opts : Options) {
@@ -85,8 +84,23 @@ fn main() {
     println!("Action: {:?}", pstate.action);
   }
 
+  let mut f = match File::open(&pstate.path) 
+                { Ok(f)  => f 
+                , Err(e) => match File::create(&pstate.path)
+                              { Ok(f)  => f
+                              , Err(e) => panic!("File not found")
+                              }
+                };
+
+  // OH LORD -- BufReaders aren't supported by csv.
+  // let mut brdr = BufReader::new(&f);
   let mut rdr = csv::Reader::from_file(&pstate.path).expect("No papers found."); // Might panic. 
-  let mut wtr = csv::Writer::from_file(&pstate.path).expect("No paper file found."); // Grab your writer
+
+  // BufWriters are, though.
+  let mut bwtr = BufWriter::new(&f); 
+  // This nukes the file.
+  // let mut wtr = csv::Writer::from_file(&pstate.path).expect("No paper file found."); // Grab your writer
+  let mut wtr = csv::Writer::from_buffer(bwtr); // Grab the writer
   println!("File open.");
   
 
@@ -99,7 +113,9 @@ fn main() {
     , Action::Empty         => print_usage(opts)
 		};
 
+  wtr.flush();
 
+  println!("-------------------------------------");
   for record in rdr.decode() {
     let record: Record = record.unwrap();
     println!("{}\n  {}\n[{}]\n", record.title, record.authors, record.tags);
