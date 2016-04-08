@@ -1,12 +1,8 @@
 extern crate csv;
 extern crate getopts;
-#[macro_use] extern crate papers;
+// #[macro_use] extern crate papers;
 extern crate rustc_serialize;
 
-use papers::util::macros::*;
-use papers::datatypes::record::*;
-use papers::datatypes::action::*;
-use papers::datatypes::progstate::*;
 use getopts::Options;
 use std::io;
 use std::io::prelude::*;
@@ -15,6 +11,15 @@ use std::io::BufReader;
 use std::env;
 use std::fs::File;
 use std::fs::OpenOptions;
+
+
+#[macro_use] mod util;
+
+mod datatypes;
+use datatypes::action::*;
+use datatypes::progstate::*;
+use datatypes::record::*;
+
 
 fn get_input(message : & str, target : &mut String) {
   println!("{}", message);
