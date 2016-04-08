@@ -1,6 +1,5 @@
 extern crate csv;
 extern crate getopts;
-// #[macro_use] extern crate papers;
 extern crate rustc_serialize;
 
 use getopts::Options;
@@ -14,6 +13,7 @@ use std::fs::OpenOptions;
 
 
 #[macro_use] mod util;
+use util::helpers::*;
 
 mod datatypes;
 use datatypes::action::*;
@@ -21,11 +21,7 @@ use datatypes::progstate::*;
 use datatypes::record::*;
 
 
-fn get_input(message : & str, target : &mut String) {
-  println!("{}", message);
-  io::stdin().read_line(target).expect("Failed to read line");
-}
-
+// Get a new entry.
 fn new_entry() -> Record {
   let mut title   : String = String::new();
   let mut authors : String = String::new();
